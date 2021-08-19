@@ -63,28 +63,33 @@ class Block {
 	 */
 	public function render_callback( $attributes, $content, $block ) {
 		$post_types = get_post_types( [ 'public' => true ] );
-		$class_name = $attributes['className'];
+		$class_name = isset($attributes['className'])? isset($attributes['className']):'';
 		ob_start();
 
 		?>
 		<div class="<?php echo $class_name; ?>">
 			<h2>Post Counts</h2>
 			<?php
-			foreach ( $post_types as $post_type_slug ) :
-				$post_type_object = get_post_type_object( $post_type_slug );
-				$post_count = count(
-					get_posts(
-						[
-							'post_type' => $post_type_slug,
-							'posts_per_page' => -1,
-						]
-					)
-				);
 
-				?>
-				<p><?php echo 'There are ' . $post_count . ' ' . $post_type_object->labels->name . '.'; ?></p>
-			<?php endforeach; ?>
-			<p><?php echo 'The current post ID is ' . $_GET['post_id'] . '.'; ?></p>
+			if(is_array($post_types)):
+				foreach ( $post_types as $post_type_slug ) :
+					$post_type_object = get_post_type_object( $post_type_slug );
+					$post_count = wp_count_posts( $post_type_slug);
+					?>
+					<p><?php echo 'There are ' . $post_count . ' ' . $post_type_object->labels->name . '.'; ?></p>
+				<?php endforeach; ?>
+			<?php endif; ?>
+			<?php
+
+			if(isset($_GET['post_id']) && !empty($_GET['post_id'])){
+				$post_id = $_GET['post_id'];	  
+			}else{
+				global $post;
+				$post_id = $post->ID;
+			}?>
+			<p>
+			<?php echo 'The current post ID is ' . $post_id . '.'; ?>
+			</p>
 		</div>
 		<?php
 
